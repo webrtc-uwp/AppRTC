@@ -871,7 +871,7 @@ Call.prototype.hangup = function (async) {
       navigator.releaseUserMedia(this.localStream_);
 
     }
-    this.localStream_.stop();
+    //this.localStream_.stop();
     this.localStream_ = null;
   }
   if (!this.params_.roomId) {

@@ -139,8 +139,8 @@ if (Org.WebRtc) {
     var tracks = stream.getTracks();
     for (var index = 0; index < tracks.length; index++) {
       var aTrack = tracks[index];
-      aTrack.stop();
       stream.removeTrack(tracks[index]);
+      aTrack.stop();
     }
   }
 
