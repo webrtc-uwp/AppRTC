@@ -524,6 +524,7 @@ AppController.prototype.createCall_ = function () {
   this.call_.onremotesdpset = this.onRemoteSdpSet_.bind(this);
   this.call_.onremotestreamadded = this.onRemoteStreamAdded_.bind(this);
   this.call_.onlocalstreamadded = this.onLocalStreamAdded_.bind(this);
+  this.call_.onlocalstreamremoved = this.onLocalStreamRemoved_.bind(this);
   this.call_.onsignalingstatechange = this.infoBox_.updateInfoDiv.bind(this.infoBox_);
   this.call_.oniceconnectionstatechange = this.infoBox_.updateInfoDiv.bind(this.infoBox_);
   this.call_.onnewicecandidate = this.infoBox_.recordIceCandidateTypes.bind(this.infoBox_);
@@ -578,6 +579,8 @@ AppController.prototype.hangup_ = function () {
   this.displayStatus_("Hanging up");
   this.transitionToDone_();
   this.call_.hangup(true);
+  //this.infoBox_ = null;
+  //this.call_ = null;
 };
 
 AppController.prototype.setting_ = function () {
@@ -629,6 +632,28 @@ AppController.prototype.onLocalStreamAdded_ = function (stream) {
   if (!this.roomSelection_) {
     this.attachLocalStream_();
   }
+    //TODO: Remove - used just for testing
+  this.show_(this.hangupSvg_);
+};
+AppController.prototype.onLocalStreamRemoved_ = function () {
+    trace("Removing local media stream.");
+    navigator.releaseUserMedia(this.localStream_);
+
+    if (this.localVideo_) {
+        navigator.releaseUserMedia(this.localVideo_.stream);
+        navigator.releaseUserMedia(this.miniVideo_.stream);
+        this.miniVideo_.videoTrack.stop();
+        if (this.localVideo_.videoTrack) {
+            this.localVideo_.videoTrack.stop();
+            //URL.revokeObjectURL(this.localVideo_.videoTrack.src);
+            //this.localVideo_.videoTrack.src = "";
+            //this.localVideo_.videoTrack = null;
+        }
+        //this.localVideo_.stream = null;
+        //this.localVideo_.srcObject = null;
+    }
+
+    this.localStream_ = null;
 };
 AppController.prototype.attachLocalStream_ = function () {
   trace("Attaching local stream.");
@@ -818,6 +843,7 @@ var Call = function (params) {
   this.onerror = null;
   this.oniceconnectionstatechange = null;
   this.onlocalstreamadded = null;
+  this.onlocalstreamremoved = null;
   this.onnewicecandidate = null;
   this.onremotehangup = null;
   this.onremotesdpset = null;
@@ -865,13 +891,23 @@ Call.prototype.hangup = function (async) {
   }
   if (this.localStream_) {
 
-    // For winrt, need to explicitly remove tracks to release local audio/video resource
+    /*if (this.pcClient_) {
+        this.pcClient_.removeStream(this.localStream_);
+    }*/
+      // For winrt, need to explicitly remove tracks to release local audio/video resource
+
+    trace("call.hangup release user media");
     if (navigator.releaseUserMedia) {
 
       navigator.releaseUserMedia(this.localStream_);
 
     }
-    //this.localStream_.stop();
+
+    trace("call.hangup onlocalstreamremoved");
+    if (this.onlocalstreamremoved) {
+        this.onlocalstreamremoved();
+    }
+
     this.localStream_ = null;
   }
   if (!this.params_.roomId) {
@@ -937,6 +973,23 @@ Call.prototype.getLeaveUrl_ = function () {
   return this.roomServer_ + "/leave/" + this.params_.roomId + "/" + this.params_.clientId;
 };
 Call.prototype.onRemoteHangup = function () {
+    if (this.localStream_) {
+
+        // For winrt, need to explicitly remove tracks to release local audio/video resource
+        trace("call.hangup release user media");
+        if (navigator.releaseUserMedia) {
+
+            navigator.releaseUserMedia(this.localStream_);
+
+        }
+
+        trace("call.hangup onlocalstreamremoved");
+        if (this.onlocalstreamremoved) {
+            this.onlocalstreamremoved();
+        }
+
+        this.localStream_ = null;
+    }
   this.startTime = null;
   this.params_.isInitiator = true;
   if (this.pcClient_) {
@@ -1517,7 +1570,8 @@ PeerConnectionClient.prototype.onSetRemoteDescriptionSuccess_ = function () {
   trace("Set remote session description success.");
   var remoteStreams = this.pc_.getRemoteStreams();
   if (this.onremotesdpset) {
-    this.onremotesdpset(remoteStreams.length > 0 && remoteStreams[0].getVideoTracks().length > 0);
+      var videoTracks = remoteStreams[0].getVideoTracks();
+      this.onremotesdpset(remoteStreams.length > 0 && videoTracks.length > 0);
   }
 };
 PeerConnectionClient.prototype.processSignalingMessage_ = function (message) {
