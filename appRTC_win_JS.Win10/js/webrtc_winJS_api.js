@@ -54,9 +54,9 @@ if (Org.WebRtc) {
     return ret;
   }
 
-  Promise.wrapWinJS = function (winRTPromise) {
+  Promise.wrapWinJS = function (winUWPPromise) {
     var ret = new Promise();
-    ret.internalPromise = winRTPromise;
+    ret.internalPromise = winUWPPromise;
     return ret;
   }
 
@@ -239,7 +239,7 @@ if (Org.WebRtc) {
 
   RTCPeerConnection = function (pcConfig, pcConstraints) {
     //Todo: do we need to implement pcConstraints in C++/CX API?
-    var winrtConfig = new Org.WebRtc.RTCConfiguration();
+    var winuwpConfig = new Org.WebRtc.RTCConfiguration();
     if (pcConfig.iceServers && pcConfig.iceServers.length > 0) {
       var iceServer = new Org.WebRtc.RTCIceServer();
       if (pcConfig.iceServers[0].urls != null) {
@@ -249,12 +249,12 @@ if (Org.WebRtc) {
       }
       iceServer.credential = pcConfig.iceServers[0].credential;
       iceServer.username = pcConfig.iceServers[0].username;
-      winrtConfig.iceServers = [];
-      winrtConfig.iceServers.push(iceServer);
+      winuwpConfig.iceServers = [];
+      winuwpConfig.iceServers.push(iceServer);
 
     }
 
-    var nativePC = new Org.WebRtc.RTCPeerConnection(winrtConfig);
+    var nativePC = new Org.WebRtc.RTCPeerConnection(winuwpConfig);
     var pc = {};
     pc.remoteDescription = null;
     pc.localDescription = null;
@@ -299,9 +299,9 @@ if (Org.WebRtc) {
       });
     };
     pc.setLocalDescription = function (desc) {
-      var winrtSDP = new RTCSessionDescription(desc);
+      var winuwpSDP = new RTCSessionDescription(desc);
       return new Promise(function (resolve, reject) {
-        pc.nativePC_.setLocalDescription(winrtSDP).then(function () {
+        pc.nativePC_.setLocalDescription(winuwpSDP).then(function () {
           resolve();
         }, function (e) {
           console.log("Error: ", e);
@@ -312,10 +312,10 @@ if (Org.WebRtc) {
     pc.setRemoteDescription = function (desc) {
       // HACK: This is a hack to force VP8 while we're waiting for VP9 to be
       // fully implemented.
-      var winrtSDP = desc;
-      winrtSDP.sdp = desc.sdp.replace(' 101 100', ' 100 101');
+      var winuwpSDP = desc;
+      winuwpSDP.sdp = desc.sdp.replace(' 101 100', ' 100 101');
       return new Promise(function (resolve, reject) {
-          pc.nativePC_.setRemoteDescription(winrtSDP).then(function () {
+          pc.nativePC_.setRemoteDescription(winuwpSDP).then(function () {
           resolve();
         }, function e() {
           console.log("Error: ", e);

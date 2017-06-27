@@ -127,7 +127,7 @@ define('WinJS/Core/_BaseCoreUtils',[
     ], function baseCoreUtilsInit(_Global) {
     "use strict";
 
-    var hasWinRT = !!_Global.Windows;
+    var hasWinUWP = !!_Global.Windows;
 
     function markSupportedForProcessing(func) {
         /// <signature helpKeyword="WinJS.Utilities.markSupportedForProcessing">
@@ -147,7 +147,7 @@ define('WinJS/Core/_BaseCoreUtils',[
     }
 
     return {
-        hasWinRT: hasWinRT,
+        hasWinUWP: hasWinUWP,
         markSupportedForProcessing: markSupportedForProcessing,
         _setImmediate: _Global.setImmediate ? _Global.setImmediate.bind(_Global) : function (handler) {
             _Global.setTimeout(handler, 0);
@@ -513,15 +513,15 @@ define('WinJS/Core/_ErrorFromName',[
 
 
 // Copyright (c) Microsoft Open Technologies, Inc.  All Rights Reserved. Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-define('WinJS/Core/_WinRT',[
+define('WinJS/Core/_WinUWP',[
     'exports',
     './_Global',
     './_Base',
-], function winrtInit(exports, _Global, _Base) {
+], function winuwpInit(exports, _Global, _Base) {
     "use strict";
 
-    exports.msGetWeakWinRTProperty = _Global.msGetWeakWinRTProperty;
-    exports.msSetWeakWinRTProperty = _Global.msSetWeakWinRTProperty;
+    exports.msGetWeakWinUWPProperty = _Global.msGetWeakWinUWPProperty;
+    exports.msSetWeakWinUWPProperty = _Global.msSetWeakWinUWPProperty;
 
     var APIs = [
         "Windows.ApplicationModel.DesignMode.designModeEnabled",
@@ -1215,11 +1215,11 @@ define('require-json!en-US/ui.resjson',{
 define('WinJS/Core/_Resources',[
     'exports',
     './_Global',
-    './_WinRT',
+    './_WinUWP',
     './_Base',
     './_Events',
     'require-json!en-US/ui.resjson',
-    ], function resourcesInit(exports, _Global, _WinRT, _Base, _Events, defaultStrings) {
+    ], function resourcesInit(exports, _Global, _WinUWP, _Base, _Events, defaultStrings) {
     "use strict";
 
     var appxVersion = "WinJS.4.0";
@@ -1296,7 +1296,7 @@ define('WinJS/Core/_Resources',[
             /// Set to true to register the event handler for the capturing phase; set to false to register for the bubbling phase.
             /// </param>
             /// </signature>
-            if (_WinRT.Windows.ApplicationModel.Resources.Core.ResourceManager && !mrtEventHook) {
+            if (_WinUWP.Windows.ApplicationModel.Resources.Core.ResourceManager && !mrtEventHook) {
                 if (type === contextChangedET) {
                     try {
                         var resContext = exports._getResourceContext();
@@ -1307,7 +1307,7 @@ define('WinJS/Core/_Resources',[
 
                         } else {
                             // The API can be called in the Background thread (web worker).
-                            _WinRT.Windows.ApplicationModel.Resources.Core.ResourceManager.current.defaultContext.qualifierValues.addEventListener("mapchanged", function (e) {
+                            _WinUWP.Windows.ApplicationModel.Resources.Core.ResourceManager.current.defaultContext.qualifierValues.addEventListener("mapchanged", function (e) {
                                 exports.dispatchEvent(contextChangedET, { qualifier: e.key, changed: e.target[e.key] });
                             }, false);
                         }
@@ -1323,9 +1323,9 @@ define('WinJS/Core/_Resources',[
 
         _formatString: formatString,
 
-        _getStringWinRT: function (resourceId) {
+        _getStringWinUWP: function (resourceId) {
             if (!resourceMap) {
-                var mainResourceMap = _WinRT.Windows.ApplicationModel.Resources.Core.ResourceManager.current.mainResourceMap;
+                var mainResourceMap = _WinUWP.Windows.ApplicationModel.Resources.Core.ResourceManager.current.mainResourceMap;
                 try {
                     resourceMap = mainResourceMap.getSubtree('Resources');
                 }
@@ -1381,7 +1381,7 @@ define('WinJS/Core/_Resources',[
         _getResourceContext: function () {
             if (_Global.document) {
                 if (typeof (resourceContext) === 'undefined') {
-                    var context = _WinRT.Windows.ApplicationModel.Resources.Core.ResourceContext;
+                    var context = _WinUWP.Windows.ApplicationModel.Resources.Core.ResourceContext;
                     if (context.getForCurrentView) {
                         resourceContext = context.getForCurrentView();
                     } else {
@@ -1397,7 +1397,7 @@ define('WinJS/Core/_Resources',[
 
     });
 
-    var getStringImpl = _WinRT.Windows.ApplicationModel.Resources.Core.ResourceManager ? exports._getStringWinRT : exports._getStringJS;
+    var getStringImpl = _WinUWP.Windows.ApplicationModel.Resources.Core.ResourceManager ? exports._getStringWinUWP : exports._getStringJS;
 
     var getString = function (resourceId) {
         /// <signature helpKeyword="WinJS.Resources.getString">
@@ -4885,18 +4885,18 @@ define('WinJS/Core/_BaseUtils',[
 
     _Base.Namespace._moduleDefine(exports, "WinJS.Utilities", {
         // Used for mocking in tests
-        _setHasWinRT: {
+        _setHasWinUWP: {
             value: function (value) {
-                _BaseCoreUtils.hasWinRT = value;
+                _BaseCoreUtils.hasWinUWP = value;
             },
             configurable: false,
             writable: false,
             enumerable: false
         },
 
-        /// <field type="Boolean" locid="WinJS.Utilities.hasWinRT" helpKeyword="WinJS.Utilities.hasWinRT">Determine if WinRT is accessible in this script context.</field>
-        hasWinRT: {
-            get: function () { return _BaseCoreUtils.hasWinRT; },
+        /// <field type="Boolean" locid="WinJS.Utilities.hasWinUWP" helpKeyword="WinJS.Utilities.hasWinUWP">Determine if WinUWP is accessible in this script context.</field>
+        hasWinUWP: {
+            get: function () { return _BaseCoreUtils.hasWinUWP; },
             configurable: false,
             enumerable: true
         },
@@ -5156,7 +5156,7 @@ define('WinJS/Core',[
     './Core/_Log',
     './Core/_Resources',
     './Core/_Trace',
-    './Core/_WinRT',
+    './Core/_WinUWP',
     './Core/_WriteProfilerMark'
     ], function () {
     // Wrapper module
@@ -5349,10 +5349,10 @@ define('WinJS/Utilities/_ElementUtilities',[
     '../Core/_Global',
     '../Core/_Base',
     '../Core/_BaseUtils',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Promise',
     '../Scheduler'
-], function elementUtilities(exports, _Global, _Base, _BaseUtils, _WinRT, Promise, Scheduler) {
+], function elementUtilities(exports, _Global, _Base, _BaseUtils, _WinUWP, Promise, Scheduler) {
     "use strict";
 
     // not supported in WebWorker
@@ -6583,8 +6583,8 @@ define('WinJS/Utilities/_ElementUtilities',[
         _GenericListener: GenericListener,
         _globalListener: new GenericListener("Global", _Global, { registerThruWinJSCustomEvents: true }),
         _documentElementListener: new GenericListener("DocumentElement", _Global.document.documentElement, { registerThruWinJSCustomEvents: true }),
-        _inputPaneListener: _WinRT.Windows.UI.ViewManagement.InputPane ?
-            new GenericListener("InputPane", _WinRT.Windows.UI.ViewManagement.InputPane.getForCurrentView()) :
+        _inputPaneListener: _WinUWP.Windows.UI.ViewManagement.InputPane ?
+            new GenericListener("InputPane", _WinUWP.Windows.UI.ViewManagement.InputPane.getForCurrentView()) :
             { addEventListener: function () { }, removeEventListener: function () { } },
 
         // Appends a hidden child to the given element that will listen for being added
@@ -8065,7 +8065,7 @@ StringLiteral       7.8.4
             var lexer = (function () {
                 function isIdentifierStartCharacter(code, text, offset, limit) {
                     // The ES5 spec decalares that identifiers consist of a bunch of unicode classes, without
-                    // WinRT support for determining unicode class membership we are looking at 2500+ lines of
+                    // WinUWP support for determining unicode class membership we are looking at 2500+ lines of
                     // javascript code to encode the relevant class tables. Instead we look for everything
                     // which is legal and < 0x7f, we exclude whitespace and line terminators, and then accept
                     // everything > 0x7f.
@@ -11941,7 +11941,7 @@ define('WinJS/Utilities/_Select',[
                     for (var i = 0; i < dataSourceLength; i++) {
                         var value = "" + this._dataSource.getValue(i);
                         var escaped = encodeHtml(value);
-                        // WinRT localization often tags the strings with reading direction. We want this
+                        // WinUWP localization often tags the strings with reading direction. We want this
                         // for display text (escaped), but don't want this in the value space, as it
                         // only present for display.
                         //
@@ -12848,7 +12848,7 @@ define('WinJS/Utilities/_XYFocus',["require", "exports", "../Core/_Global", "../
     });
 
     _Global.document.addEventListener("DOMContentLoaded", function () {
-        if (_ElementUtilities.hasWinRT && _Global["Windows"] && _Global["Windows"]["Xbox"]) {
+        if (_ElementUtilities.hasWinUWP && _Global["Windows"] && _Global["Windows"]["Xbox"]) {
             exports.enableXYFocus();
         }
 
@@ -12890,7 +12890,7 @@ define('WinJS/Utilities/_XYFocus',["require", "exports", "../Core/_Global", "../
 define('WinJS/Fragments',[
     'exports',
     './Core/_Global',
-    './Core/_WinRT',
+    './Core/_WinUWP',
     './Core/_Base',
     './Core/_BaseUtils',
     './Core/_ErrorFromName',
@@ -12900,7 +12900,7 @@ define('WinJS/Fragments',[
     './Utilities/_ElementUtilities',
     './Utilities/_SafeHtml',
     './Utilities/_Xhr'
-], function fragmentLoaderInit(exports, _Global, _WinRT, _Base, _BaseUtils, _ErrorFromName, _Resources, _WriteProfilerMark, Promise, _ElementUtilities, _SafeHtml, _Xhr) {
+], function fragmentLoaderInit(exports, _Global, _WinUWP, _Base, _BaseUtils, _ErrorFromName, _Resources, _WriteProfilerMark, Promise, _ElementUtilities, _SafeHtml, _Xhr) {
     "use strict";
 
     var strings = {
@@ -13265,7 +13265,7 @@ define('WinJS/Fragments',[
     }
 
     function _forceLocal(uri) {
-        if (_BaseUtils.hasWinRT) {
+        if (_BaseUtils.hasWinUWP) {
             // we force the URI to be cannonicalized and made absolute by IE
             //
             var a = _Global.document.createElement("a");
@@ -13273,10 +13273,10 @@ define('WinJS/Fragments',[
 
             var absolute = a.href;
 
-            // WinRT Uri class doesn't provide URI construction, but can crack the URI
+            // WinUWP Uri class doesn't provide URI construction, but can crack the URI
             // appart to let us reliably discover the scheme.
             //
-            var wuri = new _WinRT.Windows.Foundation.Uri(absolute);
+            var wuri = new _WinUWP.Windows.Foundation.Uri(absolute);
 
             // Only "ms-appx" (local package content) are allowed when running in the local
             // context. Both strings are known to be safe to compare in any culture (including Turkish).
@@ -13361,14 +13361,14 @@ define('WinJS/Fragments',[
 define('WinJS/Application/_State',[
     'exports',
     '../Core/_Global',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_BaseUtils',
     '../Promise'
-    ], function stateInit(exports, _Global, _WinRT, _Base, _BaseUtils, Promise) {
+    ], function stateInit(exports, _Global, _WinUWP, _Base, _BaseUtils, Promise) {
     "use strict";
 
-    function initWithWinRT() {
+    function initWithWinUWP() {
         var local, temp, roaming;
 
         var IOHelper = _Base.Class.define(
@@ -13430,7 +13430,7 @@ define('WinJS/Application/_State',[
                 /// Promise which is fulfilled when the file has been written
                 /// </returns>
                 /// </signature>
-                var sto = _WinRT.Windows.Storage;
+                var sto = _WinUWP.Windows.Storage;
                 var that = this;
                 return that.folder.createFileAsync(fileName, sto.CreationCollisionOption.openIfExists).
                     then(function (fileItem) {
@@ -13454,7 +13454,7 @@ define('WinJS/Application/_State',[
                 /// Promise containing the contents of the file, or def.
                 /// </returns>
                 /// </signature>
-                var sto = _WinRT.Windows.Storage;
+                var sto = _WinUWP.Windows.Storage;
                 return this._tryGetItemAsync(fileName).then(function (fileItem) {
                     return fileItem ? sto.FileIO.readTextAsync(fileItem) : def;
                 }).then(null, function () { return def; });
@@ -13472,7 +13472,7 @@ define('WinJS/Application/_State',[
             local: {
                 get: function () {
                     if (!local) {
-                        local = new IOHelper(_WinRT.Windows.Storage.ApplicationData.current.localFolder);
+                        local = new IOHelper(_WinUWP.Windows.Storage.ApplicationData.current.localFolder);
                     }
                     return local;
                 }
@@ -13484,7 +13484,7 @@ define('WinJS/Application/_State',[
             temp: {
                 get: function () {
                     if (!temp) {
-                        temp = new IOHelper(_WinRT.Windows.Storage.ApplicationData.current.temporaryFolder);
+                        temp = new IOHelper(_WinUWP.Windows.Storage.ApplicationData.current.temporaryFolder);
                     }
                     return temp;
                 }
@@ -13496,7 +13496,7 @@ define('WinJS/Application/_State',[
             roaming: {
                 get: function () {
                     if (!roaming) {
-                        roaming = new IOHelper(_WinRT.Windows.Storage.ApplicationData.current.roamingFolder);
+                        roaming = new IOHelper(_WinUWP.Windows.Storage.ApplicationData.current.roamingFolder);
                     }
                     return roaming;
                 }
@@ -13601,8 +13601,8 @@ define('WinJS/Application/_State',[
         });
     }
 
-    if (_WinRT.Windows.Storage.FileIO && _WinRT.Windows.Storage.ApplicationData && _WinRT.Windows.Storage.CreationCollisionOption) {
-        initWithWinRT();
+    if (_WinUWP.Windows.Storage.FileIO && _WinUWP.Windows.Storage.ApplicationData && _WinUWP.Windows.Storage.CreationCollisionOption) {
+        initWithWinUWP();
     } else {
         initWithStub();
     }
@@ -13969,7 +13969,7 @@ define('WinJS/Navigation',[
 define('WinJS/Application',[
     'exports',
     './Core/_Global',
-    './Core/_WinRT',
+    './Core/_WinUWP',
     './Core/_Base',
     './Core/_Events',
     './Core/_Log',
@@ -13980,7 +13980,7 @@ define('WinJS/Application',[
     './_Signal',
     './Scheduler',
     './Utilities/_ElementUtilities'
-    ], function applicationInit(exports, _Global, _WinRT, _Base, _Events, _Log, _WriteProfilerMark, _State, Navigation, Promise, _Signal, Scheduler, _ElementUtilities) {
+    ], function applicationInit(exports, _Global, _WinUWP, _Base, _Events, _Log, _WriteProfilerMark, _State, Navigation, Promise, _Signal, Scheduler, _ElementUtilities) {
     "use strict";
 
     _Global.Debug && (_Global.Debug.setNonUserCodeExceptions = true);
@@ -14018,8 +14018,8 @@ define('WinJS/Application',[
         updateRegistration: function Application_TypeToSearch_updateRegistration() {
             var ls = listeners._listeners && listeners._listeners[requestingFocusOnKeyboardInputET] || [];
             if (!TypeToSearch._registered && ls.length > 0) {
-                if (_WinRT.Windows.ApplicationModel.Search.Core.SearchSuggestionManager) {
-                    TypeToSearch._suggestionManager = new _WinRT.Windows.ApplicationModel.Search.Core.SearchSuggestionManager();
+                if (_WinUWP.Windows.ApplicationModel.Search.Core.SearchSuggestionManager) {
+                    TypeToSearch._suggestionManager = new _WinUWP.Windows.ApplicationModel.Search.Core.SearchSuggestionManager();
                     TypeToSearch._suggestionManager.addEventListener("requestingfocusonkeyboardinput", requestingFocusOnKeyboardInput);
                 } else {
                     TypeToSearch._updateKeydownCaptureListeners(_Global.top, true /*add*/);
@@ -14027,7 +14027,7 @@ define('WinJS/Application',[
                 TypeToSearch._registered = true;
             }
             if (TypeToSearch._registered && ls.length === 0) {
-                if (_WinRT.Windows.ApplicationModel.Search.Core.SearchSuggestionManager) {
+                if (_WinUWP.Windows.ApplicationModel.Search.Core.SearchSuggestionManager) {
                     TypeToSearch._suggestionManager && TypeToSearch._suggestionManager.removeEventListener("requestingfocusonkeyboardinput", requestingFocusOnKeyboardInput);
                     TypeToSearch._suggestionManager = null;
                 } else {
@@ -14462,10 +14462,10 @@ define('WinJS/Application',[
         backclick: [
             function Application_backClickHandler(e, handled) {
                 if (handled) {
-                    e._winRTBackPressedEvent.handled = true;
+                    e._winUWPBackPressedEvent.handled = true;
                 } else if (Navigation.canGoBack) {
                     Navigation.back();
-                    e._winRTBackPressedEvent.handled = true;
+                    e._winUWPBackPressedEvent.handled = true;
                 }
             }
         ],
@@ -14479,7 +14479,7 @@ define('WinJS/Application',[
     };
 
     // loaded == DOMContentLoaded
-    // activated == after WinRT Activated
+    // activated == after WinUWP Activated
     // ready == after all of the above
     //
     function activatedHandler(e) {
@@ -14494,11 +14494,11 @@ define('WinJS/Application',[
     }
     function domContentLoadedHandler() {
         queueEvent({ type: loadedET });
-        if (!(_Global.document && _WinRT.Windows.UI.WebUI.WebUIApplication)) {
+        if (!(_Global.document && _WinUWP.Windows.UI.WebUI.WebUIApplication)) {
             var activatedArgs = {
                 arguments: "",
                 kind: "Windows.Launch",
-                previousExecutionState: 0 //_WinRT.Windows.ApplicationModel.Activation.ApplicationExecutionState.NotRunning
+                previousExecutionState: 0 //_WinUWP.Windows.ApplicationModel.Activation.ApplicationExecutionState.NotRunning
             };
             _State._loadState(activatedArgs).then(function () {
                 queueEvent({ type: activatedET, detail: activatedArgs });
@@ -14600,11 +14600,11 @@ define('WinJS/Application',[
         listeners.dispatchEvent(settingsET, event);
     }
 
-    function hardwareButtonBackPressed(winRTBackPressedEvent) {
-        // Fire WinJS.Application 'backclick' event. If the winRTBackPressedEvent is not handled, the app will get suspended.
+    function hardwareButtonBackPressed(winUWPBackPressedEvent) {
+        // Fire WinJS.Application 'backclick' event. If the winUWPBackPressedEvent is not handled, the app will get suspended.
         var eventRecord = { type: backClickET };
-        Object.defineProperty(eventRecord, "_winRTBackPressedEvent", {
-            value: winRTBackPressedEvent,
+        Object.defineProperty(eventRecord, "_winUWPBackPressedEvent", {
+            value: winUWPBackPressedEvent,
             enumerable: false
         });
         dispatchEvent(eventRecord);
@@ -14636,25 +14636,25 @@ define('WinJS/Application',[
             // None of these are enabled in web worker
             if (_Global.document) {
                 _Global.addEventListener("error", errorHandler, false);
-                if (_WinRT.Windows.UI.WebUI.WebUIApplication) {
+                if (_WinUWP.Windows.UI.WebUI.WebUIApplication) {
                     
-                    var wui = _WinRT.Windows.UI.WebUI.WebUIApplication;
+                    var wui = _WinUWP.Windows.UI.WebUI.WebUIApplication;
                     wui.addEventListener("activated", activatedHandler, false);
                     wui.addEventListener("suspending", suspendingHandler, false);
                 }
 
-                if (_WinRT.Windows.UI.ApplicationSettings.SettingsPane) {
-                    var settingsPane = _WinRT.Windows.UI.ApplicationSettings.SettingsPane.getForCurrentView();
+                if (_WinUWP.Windows.UI.ApplicationSettings.SettingsPane) {
+                    var settingsPane = _WinUWP.Windows.UI.ApplicationSettings.SettingsPane.getForCurrentView();
                     settingsPane.addEventListener("commandsrequested", commandsRequested);
                 }
 
                 // Code in WinJS.Application for phone. This integrates WinJS.Application into the hardware back button.
-                if (_WinRT.Windows.Phone.UI.Input.HardwareButtons) {
-                    _WinRT.Windows.Phone.UI.Input.HardwareButtons.addEventListener("backpressed", hardwareButtonBackPressed);
+                if (_WinUWP.Windows.Phone.UI.Input.HardwareButtons) {
+                    _WinUWP.Windows.Phone.UI.Input.HardwareButtons.addEventListener("backpressed", hardwareButtonBackPressed);
                 }
                 
-                if (_WinRT.Windows.UI.Input.EdgeGesture) {
-                    var edgy = _WinRT.Windows.UI.Input.EdgeGesture.getForCurrentView();
+                if (_WinUWP.Windows.UI.Input.EdgeGesture) {
+                    var edgy = _WinUWP.Windows.UI.Input.EdgeGesture.getForCurrentView();
                     edgy.addEventListener("starting", edgyStarting);
                     edgy.addEventListener("completed", edgyCompleted);
                     edgy.addEventListener("canceled", edgyCanceled);
@@ -14671,26 +14671,26 @@ define('WinJS/Application',[
 
             // None of these are enabled in web worker
             if (_Global.document) {
-                if (_WinRT.Windows.UI.WebUI.WebUIApplication) {
+                if (_WinUWP.Windows.UI.WebUI.WebUIApplication) {
                     _Global.removeEventListener("error", errorHandler, false);
 
-                    var wui = _WinRT.Windows.UI.WebUI.WebUIApplication;
+                    var wui = _WinUWP.Windows.UI.WebUI.WebUIApplication;
                     wui.removeEventListener("activated", activatedHandler, false);
                     wui.removeEventListener("suspending", suspendingHandler, false);
                 }
 
-                if (_WinRT.Windows.UI.ApplicationSettings.SettingsPane) {
-                    var settingsPane = _WinRT.Windows.UI.ApplicationSettings.SettingsPane.getForCurrentView();
+                if (_WinUWP.Windows.UI.ApplicationSettings.SettingsPane) {
+                    var settingsPane = _WinUWP.Windows.UI.ApplicationSettings.SettingsPane.getForCurrentView();
                     settingsPane.removeEventListener("commandsrequested", commandsRequested);
                 }
 
                 // Code in WinJS.Application for phone. This integrates WinJS.Application into the hardware back button.
-                if (_WinRT.Windows.Phone.UI.Input.HardwareButtons) {
-                    _WinRT.Windows.Phone.UI.Input.HardwareButtons.removeEventListener("backpressed", hardwareButtonBackPressed);
+                if (_WinUWP.Windows.Phone.UI.Input.HardwareButtons) {
+                    _WinUWP.Windows.Phone.UI.Input.HardwareButtons.removeEventListener("backpressed", hardwareButtonBackPressed);
                 }
                 
-                if (_WinRT.Windows.UI.Input.EdgeGesture) {
-                    var edgy = _WinRT.Windows.UI.Input.EdgeGesture.getForCurrentView();
+                if (_WinUWP.Windows.UI.Input.EdgeGesture) {
+                    var edgy = _WinUWP.Windows.UI.Input.EdgeGesture.getForCurrentView();
                     edgy.removeEventListener("starting", edgyStarting);
                     edgy.removeEventListener("completed", edgyCompleted);
                     edgy.removeEventListener("canceled", edgyCanceled);
@@ -14888,13 +14888,13 @@ define('WinJS/Animations/_Constants',[
 define('WinJS/Animations/_TransitionAnimation',[
     'exports',
     '../Core/_Global',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_BaseUtils',
     '../Promise',
     '../Scheduler',
     '../Utilities/_ElementUtilities'
-    ], function transitionAnimationInit(exports, _Global, _WinRT, _Base, _BaseUtils, Promise, Scheduler, _ElementUtilities) {
+    ], function transitionAnimationInit(exports, _Global, _WinUWP, _Base, _BaseUtils, Promise, Scheduler, _ElementUtilities) {
     "use strict";
 
     // not supported in WebWorker
@@ -15238,8 +15238,8 @@ define('WinJS/Animations/_TransitionAnimation',[
     var animationSettings;
     function initAnimations() {
         if (!animationSettings) {
-            if (_WinRT.Windows.UI.ViewManagement.UISettings) {
-                animationSettings = new _WinRT.Windows.UI.ViewManagement.UISettings();
+            if (_WinUWP.Windows.UI.ViewManagement.UISettings) {
+                animationSettings = new _WinUWP.Windows.UI.ViewManagement.UISettings();
             } else {
                 animationSettings = { animationsEnabled: true };
             }
@@ -18193,26 +18193,26 @@ define('WinJS/Binding/_BindingParser',[
 define('WinJS/Binding/_DomWeakRefTable',[
     'exports',
     '../Core/_Global',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_BaseUtils',
     '../Scheduler'
-    ], function DOMWeakRefTableInit(exports, _Global, _WinRT, _Base, _BaseUtils, Scheduler) {
+    ], function DOMWeakRefTableInit(exports, _Global, _WinUWP, _Base, _BaseUtils, Scheduler) {
     "use strict";
 
-    if (_WinRT.Windows.Foundation.Uri && _WinRT.msSetWeakWinRTProperty && _WinRT.msGetWeakWinRTProperty) {
+    if (_WinUWP.Windows.Foundation.Uri && _WinUWP.msSetWeakWinUWPProperty && _WinUWP.msGetWeakWinUWPProperty) {
 
-        var host = new _WinRT.Windows.Foundation.Uri("about://blank");
+        var host = new _WinUWP.Windows.Foundation.Uri("about://blank");
 
         _Base.Namespace._moduleDefine(exports, "WinJS.Utilities", {
 
             _createWeakRef: function (element, id) {
-                _WinRT.msSetWeakWinRTProperty(host, id, element);
+                _WinUWP.msSetWeakWinUWPProperty(host, id, element);
                 return id;
             },
 
             _getWeakRefElement: function (id) {
-                return _WinRT.msGetWeakWinRTProperty(host, id);
+                return _WinUWP.msGetWeakWinUWPProperty(host, id);
             }
 
         });
@@ -18353,7 +18353,7 @@ define('WinJS/Binding/_DomWeakRefTable',[
 // Copyright (c) Microsoft Open Technologies, Inc.  All Rights Reserved. Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 define('WinJS/Binding/_Data',[
     'exports',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_BaseUtils',
     '../Core/_ErrorFromName',
@@ -18362,7 +18362,7 @@ define('WinJS/Binding/_Data',[
     '../Promise',
     '../Scheduler',
     './_DomWeakRefTable'
-    ], function dataInit(exports, _WinRT, _Base, _BaseUtils, _ErrorFromName, _Log, _Resources, Promise, Scheduler, _DomWeakRefTable) {
+    ], function dataInit(exports, _WinUWP, _Base, _BaseUtils, _ErrorFromName, _Log, _Resources, Promise, Scheduler, _DomWeakRefTable) {
     "use strict";
 
 
@@ -18742,7 +18742,7 @@ define('WinJS/Binding/_Data',[
         return "bindHandler" + (bindRefId++);
     };
     var createProxy = function (func, bindStateRef) {
-        if (!_WinRT.msGetWeakWinRTProperty) {
+        if (!_WinUWP.msGetWeakWinUWPProperty) {
             return func;
         }
 
@@ -19002,7 +19002,7 @@ define('WinJS/Binding/_Data',[
 define('WinJS/Binding/_Declarative',[
     'exports',
     '../Core/_Global',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_BaseUtils',
     '../Core/_ErrorFromName',
@@ -19014,14 +19014,14 @@ define('WinJS/Binding/_Declarative',[
     './_BindingParser',
     './_Data',
     './_DomWeakRefTable'
-    ], function declarativeInit(exports, _Global, _WinRT, _Base, _BaseUtils, _ErrorFromName, _Log, _Resources, _WriteProfilerMark, Promise, _ElementUtilities, _BindingParser, _Data, _DomWeakRefTable) {
+    ], function declarativeInit(exports, _Global, _WinUWP, _Base, _BaseUtils, _ErrorFromName, _Log, _Resources, _WriteProfilerMark, Promise, _ElementUtilities, _BindingParser, _Data, _DomWeakRefTable) {
     "use strict";
 
     var uid = (Math.random() * 1000) >> 0;
 
     // If we have proper weak references then we can move away from using the element's ID property
     //
-    var optimizeBindingReferences = _WinRT.msSetWeakWinRTProperty && _WinRT.msGetWeakWinRTProperty;
+    var optimizeBindingReferences = _WinUWP.msSetWeakWinUWPProperty && _WinUWP.msGetWeakWinUWPProperty;
 
     var strings = {
         get attributeBindingSingleProperty() { return "Attribute binding requires a single destination attribute name, often in the form \"this['aria-label']\" or \"width\"."; },
@@ -21975,7 +21975,7 @@ define('WinJS/BindingTemplate/_DataTemplateCompiler',[
 define('WinJS/BindingTemplate',[
     'exports',
     './Core/_Global',
-    './Core/_WinRT',
+    './Core/_WinUWP',
     './Core/_Base',
     './Core/_BaseUtils',
     './Core/_Log',
@@ -21987,7 +21987,7 @@ define('WinJS/BindingTemplate',[
     './Promise',
     './Utilities/_Dispose',
     './Utilities/_ElementUtilities'
-    ], function dataTemplateInit(exports, _Global, _WinRT, _Base, _BaseUtils, _Log, _WriteProfilerMark, _Declarative, _DataTemplateCompiler, ControlProcessor, Fragments, Promise, _Dispose, _ElementUtilities) {
+    ], function dataTemplateInit(exports, _Global, _WinUWP, _Base, _BaseUtils, _Log, _WriteProfilerMark, _Declarative, _DataTemplateCompiler, ControlProcessor, Fragments, Promise, _Dispose, _ElementUtilities) {
     "use strict";
 
     // not supported in WebWorker
@@ -22392,7 +22392,7 @@ define('WinJS/BindingTemplate',[
                         profilerMarkIdentifier: this._profilerMarkIdentifier
                     });
 
-                    var resetOnFragmentChange = options.resetOnFragmentChange || _WinRT.Windows.ApplicationModel.DesignMode.designModeEnabled;
+                    var resetOnFragmentChange = options.resetOnFragmentChange || _WinUWP.Windows.ApplicationModel.DesignMode.designModeEnabled;
                     if (resetOnFragmentChange) {
                         // For platforms that don't support MutationObserver the shim
                         // currently will never fire. This is OK because only MutationObserver
@@ -22458,14 +22458,14 @@ define('WinJS/BindingTemplate',[
 //
 define('WinJS/BindingList/_BindingListDataSource',[
     'exports',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_ErrorFromName',
     '../Binding/_DomWeakRefTable',
     '../Promise',
     '../Scheduler',
     '../Utilities/_UI'
-    ], function bindingListDataSourceInit(exports, _WinRT, _Base, _ErrorFromName, _DomWeakRefTable, Promise, Scheduler, _UI) {
+    ], function bindingListDataSourceInit(exports, _WinUWP, _Base, _ErrorFromName, _DomWeakRefTable, Promise, Scheduler, _UI) {
     "use strict";
 
     _Base.Namespace._moduleDefine(exports, "WinJS.Binding", {
@@ -22601,7 +22601,7 @@ define('WinJS/BindingList/_BindingListDataSource',[
                 // When in WebContext, weakref utility functions don't work as desired so we capture this
                 // ListBinding object in the handler's closure. This causes the same leak as in 1.0.
                 var fallbackReference = null;
-                if (!_WinRT.msSetWeakWinRTProperty || !_WinRT.msGetWeakWinRTProperty) {
+                if (!_WinUWP.msSetWeakWinUWPProperty || !_WinUWP.msGetWeakWinUWPProperty) {
                     fallbackReference = this;
                 }
                 if (notificationHandler) {
@@ -23074,7 +23074,7 @@ define('WinJS/BindingList/_BindingListDataSource',[
 
             var bindingId = 0;
             var DataSource = _Base.Class.define(function DataSource_ctor(list) {
-                this._usingWeakRef = _WinRT.msSetWeakWinRTProperty && _WinRT.msGetWeakWinRTProperty;
+                this._usingWeakRef = _WinUWP.msSetWeakWinUWPProperty && _WinUWP.msGetWeakWinUWPProperty;
                 this._bindings = {};
                 this._list = list;
 
@@ -33090,7 +33090,7 @@ define('WinJS/VirtualizedDataSource/_GroupedItemDataSource',[
 
 define('WinJS/VirtualizedDataSource/_StorageDataSource',[
     'exports',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Global',
     '../Core/_Base',
     '../Core/_ErrorFromName',
@@ -33099,7 +33099,7 @@ define('WinJS/VirtualizedDataSource/_StorageDataSource',[
     '../Promise',
     '../Utilities/_UI',
     './_VirtualizedDataSourceImpl'
-    ], function storageDataSourceInit(exports, _WinRT, _Global, _Base, _ErrorFromName, _WriteProfilerMark, Animations, Promise, _UI, VirtualizedDataSource) {
+    ], function storageDataSourceInit(exports, _WinUWP, _Global, _Base, _ErrorFromName, _WriteProfilerMark, Animations, Promise, _UI, VirtualizedDataSource) {
     "use strict";
 
     _Base.Namespace._moduleDefine(exports, "WinJS.UI", {
@@ -33108,36 +33108,36 @@ define('WinJS/VirtualizedDataSource/_StorageDataSource',[
                 // Constructor
                 _WriteProfilerMark("WinJS.UI.StorageDataSource:constructor,StartTM");
 
-                var mode = _WinRT.Windows.Storage.FileProperties.ThumbnailMode.singleItem,
+                var mode = _WinUWP.Windows.Storage.FileProperties.ThumbnailMode.singleItem,
                     size = 256,
-                    flags = _WinRT.Windows.Storage.FileProperties.ThumbnailOptions.useCurrentScale,
+                    flags = _WinUWP.Windows.Storage.FileProperties.ThumbnailOptions.useCurrentScale,
                     delayLoad = true,
                     library;
 
                 if (query === "Pictures") {
-                    mode = _WinRT.Windows.Storage.FileProperties.ThumbnailMode.picturesView;
-                    library = _WinRT.Windows.Storage.KnownFolders.picturesLibrary;
+                    mode = _WinUWP.Windows.Storage.FileProperties.ThumbnailMode.picturesView;
+                    library = _WinUWP.Windows.Storage.KnownFolders.picturesLibrary;
                     size = 190;
                 } else if (query === "Music") {
-                    mode = _WinRT.Windows.Storage.FileProperties.ThumbnailMode.musicView;
-                    library = _WinRT.Windows.Storage.KnownFolders.musicLibrary;
+                    mode = _WinUWP.Windows.Storage.FileProperties.ThumbnailMode.musicView;
+                    library = _WinUWP.Windows.Storage.KnownFolders.musicLibrary;
                     size = 256;
                 } else if (query === "Documents") {
-                    mode = _WinRT.Windows.Storage.FileProperties.ThumbnailMode.documentsView;
-                    library = _WinRT.Windows.Storage.KnownFolders.documentsLibrary;
+                    mode = _WinUWP.Windows.Storage.FileProperties.ThumbnailMode.documentsView;
+                    library = _WinUWP.Windows.Storage.KnownFolders.documentsLibrary;
                     size = 40;
                 } else if (query === "Videos") {
-                    mode = _WinRT.Windows.Storage.FileProperties.ThumbnailMode.videosView;
-                    library = _WinRT.Windows.Storage.KnownFolders.videosLibrary;
+                    mode = _WinUWP.Windows.Storage.FileProperties.ThumbnailMode.videosView;
+                    library = _WinUWP.Windows.Storage.KnownFolders.videosLibrary;
                     size = 190;
                 }
 
                 if (!library) {
                     this._query = query;
                 } else {
-                    var queryOptions = new _WinRT.Windows.Storage.Search.QueryOptions();
-                    queryOptions.folderDepth = _WinRT.Windows.Storage.Search.FolderDepth.deep;
-                    queryOptions.indexerOption = _WinRT.Windows.Storage.Search.IndexerOption.useIndexerWhenAvailable;
+                    var queryOptions = new _WinUWP.Windows.Storage.Search.QueryOptions();
+                    queryOptions.folderDepth = _WinUWP.Windows.Storage.Search.FolderDepth.deep;
+                    queryOptions.indexerOption = _WinUWP.Windows.Storage.Search.IndexerOption.useIndexerWhenAvailable;
                     this._query = library.createFileQueryWithOptions(queryOptions);
                 }
 
@@ -33149,16 +33149,16 @@ define('WinJS/VirtualizedDataSource/_StorageDataSource',[
                         size = Math.max(1, Math.min(options.requestedThumbnailSize, 1024));
                     } else {
                         switch (mode) {
-                            case _WinRT.Windows.Storage.FileProperties.ThumbnailMode.picturesView:
-                            case _WinRT.Windows.Storage.FileProperties.ThumbnailMode.videosView:
+                            case _WinUWP.Windows.Storage.FileProperties.ThumbnailMode.picturesView:
+                            case _WinUWP.Windows.Storage.FileProperties.ThumbnailMode.videosView:
                                 size = 190;
                                 break;
-                            case _WinRT.Windows.Storage.FileProperties.ThumbnailMode.documentsView:
-                            case _WinRT.Windows.Storage.FileProperties.ThumbnailMode.listView:
+                            case _WinUWP.Windows.Storage.FileProperties.ThumbnailMode.documentsView:
+                            case _WinUWP.Windows.Storage.FileProperties.ThumbnailMode.listView:
                                 size = 40;
                                 break;
-                            case _WinRT.Windows.Storage.FileProperties.ThumbnailMode.musicView:
-                            case _WinRT.Windows.Storage.FileProperties.ThumbnailMode.singleItem:
+                            case _WinUWP.Windows.Storage.FileProperties.ThumbnailMode.musicView:
+                            case _WinUWP.Windows.Storage.FileProperties.ThumbnailMode.singleItem:
                                 size = 256;
                                 break;
                         }
@@ -33171,7 +33171,7 @@ define('WinJS/VirtualizedDataSource/_StorageDataSource',[
                     }
                 }
 
-                this._loader = new _WinRT.Windows.Storage.BulkAccess.FileInformationFactory(this._query, mode, size, flags, delayLoad);
+                this._loader = new _WinUWP.Windows.Storage.BulkAccess.FileInformationFactory(this._query, mode, size, flags, delayLoad);
                 this.compareByIdentity = false;
                 this.firstDataRequest = true;
                 _WriteProfilerMark("WinJS.UI.StorageDataSource:constructor,StopTM");
@@ -33374,7 +33374,7 @@ define('WinJS/VirtualizedDataSource/_StorageDataSource',[
 
                                 // If we have the full resolution thumbnail, we can cancel further updates and complete the promise
                                 // when current work is complete.
-                                if ((thumbnail.type !== _WinRT.Windows.Storage.FileProperties.ThumbnailType.icon) && !thumbnail.returnedSmallerCachedSize) {
+                                if ((thumbnail.type !== _WinUWP.Windows.Storage.FileProperties.ThumbnailType.icon) && !thumbnail.returnedSmallerCachedSize) {
                                     _WriteProfilerMark("WinJS.UI.StorageDataSource:loadThumbnail complete,info");
                                     item.data.removeEventListener("thumbnailupdated", thumbnailUpdateHandler);
                                     shouldRespondToThumbnailUpdate = false;
@@ -33548,7 +33548,7 @@ define('WinJS/Controls/ItemContainer/_Constants',[
 define('WinJS/Controls/ItemContainer/_ItemEventsHandler',[
     'exports',
     '../../Core/_Global',
-    '../../Core/_WinRT',
+    '../../Core/_WinUWP',
     '../../Core/_Base',
     '../../Core/_BaseUtils',
     '../../Core/_WriteProfilerMark',
@@ -33558,7 +33558,7 @@ define('WinJS/Controls/ItemContainer/_ItemEventsHandler',[
     '../../Utilities/_ElementUtilities',
     '../../Utilities/_UI',
     './_Constants'
-    ], function itemEventsHandlerInit(exports, _Global, _WinRT, _Base, _BaseUtils, _WriteProfilerMark, Animations, _TransitionAnimation, Promise, _ElementUtilities, _UI, _Constants) {
+    ], function itemEventsHandlerInit(exports, _Global, _WinUWP, _Base, _BaseUtils, _WriteProfilerMark, Animations, _TransitionAnimation, Promise, _ElementUtilities, _UI, _Constants) {
     "use strict";
 
     var transformNames = _BaseUtils._browserStyleEquivalents["transform"];
@@ -33676,7 +33676,7 @@ define('WinJS/Controls/ItemContainer/_ItemEventsHandler',[
                         leftButton,
                         rightButton;
                     site.pressedElement = eventObject.target;
-                    if (_WinRT.Windows.UI.Input.PointerPoint) {
+                    if (_WinUWP.Windows.UI.Input.PointerPoint) {
                         // xButton is true when you've x-clicked with a mouse or pen. Otherwise it is false.
                         var currentPoint = this._getCurrentPoint(eventObject);
                         var pointProps = currentPoint.properties;
@@ -34006,7 +34006,7 @@ define('WinJS/Controls/ItemContainer/_ItemEventsHandler',[
                 },
 
                 _getCurrentPoint: function ItemEventsHandler_getCurrentPoint(eventObject) {
-                    return _WinRT.Windows.UI.Input.PointerPoint.getCurrentPoint(eventObject.pointerId);
+                    return _WinUWP.Windows.UI.Input.PointerPoint.getCurrentPoint(eventObject.pointerId);
                 },
 
                 _containedInElementWithClass: function ItemEventsHandler_containedInElementWithClass(element, className) {
@@ -54530,7 +54530,7 @@ define('require-style!less/styles-datetimepicker',[],function(){});
 // Copyright (c) Microsoft Open Technologies, Inc.  All Rights Reserved. Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 define('WinJS/Controls/DatePicker',[
     '../Core/_Global',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_BaseUtils',
     '../Core/_Events',
@@ -54540,7 +54540,7 @@ define('WinJS/Controls/DatePicker',[
     '../Utilities/_Hoverable',
     '../Utilities/_Select',
     'require-style!less/styles-datetimepicker'
-    ], function datePickerInit(_Global, _WinRT, _Base, _BaseUtils, _Events, _Resources, _Control, _ElementUtilities, _Hoverable, _Select) {
+    ], function datePickerInit(_Global, _WinUWP, _Base, _BaseUtils, _Events, _Resources, _Control, _ElementUtilities, _Hoverable, _Select) {
     "use strict";
 
     _Base.Namespace.define("WinJS.UI", {
@@ -54571,7 +54571,7 @@ define('WinJS/Controls/DatePicker',[
             var yearFormatCache = {};
 
             function newFormatter(pattern, calendar, defaultPattern) {
-                var dtf = _WinRT.Windows.Globalization.DateTimeFormatting;
+                var dtf = _WinUWP.Windows.Globalization.DateTimeFormatting;
                 pattern = !pattern ? defaultPattern : pattern;
                 var c = new dtf.DateTimeFormatter(pattern);
                 if (calendar) {
@@ -54625,7 +54625,7 @@ define('WinJS/Controls/DatePicker',[
             }
 
             function newCal(calendar) {
-                var glob = _WinRT.Windows.Globalization;
+                var glob = _WinUWP.Windows.Globalization;
                 var c = new glob.Calendar();
                 if (calendar) {
                     return new glob.Calendar(c.languages, calendar, c.getClock());
@@ -55018,7 +55018,7 @@ define('WinJS/Controls/DatePicker',[
                     }
                 },
             }, {
-                _getInformationWinRT: function (startDate, endDate, calendar, datePatterns) {
+                _getInformationWinUWP: function (startDate, endDate, calendar, datePatterns) {
                     datePatterns = datePatterns || { date: DEFAULT_DAY_PATTERN, month: DEFAULT_MONTH_PATTERN, year: DEFAULT_YEAR_PATTERN };
 
                     var tempCal = newCal(calendar);
@@ -55268,8 +55268,8 @@ define('WinJS/Controls/DatePicker',[
                     };
                 }
             });
-            if (_WinRT.Windows.Globalization.Calendar && _WinRT.Windows.Globalization.DateTimeFormatting) {
-                DatePicker.getInformation = DatePicker._getInformationWinRT;
+            if (_WinUWP.Windows.Globalization.Calendar && _WinUWP.Windows.Globalization.DateTimeFormatting) {
+                DatePicker.getInformation = DatePicker._getInformationWinUWP;
             } else {
                 DatePicker.getInformation = DatePicker._getInformationJS;
             }
@@ -55286,7 +55286,7 @@ define('WinJS/Controls/DatePicker',[
 
 define('WinJS/Controls/TimePicker',[
     '../Core/_Global',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_BaseUtils',
     '../Core/_Events',
@@ -55296,7 +55296,7 @@ define('WinJS/Controls/TimePicker',[
     '../Utilities/_Hoverable',
     '../Utilities/_Select',
     'require-style!less/styles-datetimepicker'
-    ], function timePickerInit(_Global, _WinRT, _Base, _BaseUtils, _Events, _Resources, _Control, _ElementUtilities, _Hoverable, _Select) {
+    ], function timePickerInit(_Global, _WinUWP, _Base, _BaseUtils, _Events, _Resources, _Control, _ElementUtilities, _Hoverable, _Select) {
     "use strict";
 
     _Base.Namespace.define("WinJS.UI", {
@@ -55726,9 +55726,9 @@ define('WinJS/Controls/TimePicker',[
                     var current = new Date();
                     return new Date(2011, 6, 15, current.getHours(), current.getMinutes());
                 },
-                _getInformationWinRT: function (clock, minuteIncrement, timePatterns) {
+                _getInformationWinUWP: function (clock, minuteIncrement, timePatterns) {
                     var newFormatter = function (pattern, defaultPattern) {
-                        var dtf = _WinRT.Windows.Globalization.DateTimeFormatting;
+                        var dtf = _WinUWP.Windows.Globalization.DateTimeFormatting;
                         pattern = !pattern ? defaultPattern : pattern;
                         var formatter = new dtf.DateTimeFormatter(pattern);
                         if (clock) {
@@ -55737,7 +55737,7 @@ define('WinJS/Controls/TimePicker',[
                         return formatter;
                     };
 
-                    var glob = _WinRT.Windows.Globalization;
+                    var glob = _WinUWP.Windows.Globalization;
                     var calendar = new glob.Calendar();
                     if (clock) {
                         calendar = new glob.Calendar(calendar.languages, calendar.getCalendarSystem(), clock);
@@ -55814,8 +55814,8 @@ define('WinJS/Controls/TimePicker',[
                     }
 
 
-                    var DateTimeFormatter = _WinRT.Windows.Globalization.DateTimeFormatting.DateTimeFormatter;
-                    var dtf = new DateTimeFormatter("month.full", _WinRT.Windows.Globalization.ApplicationLanguages.languages, "ZZ", "GregorianCalendar", "24HourClock");
+                    var DateTimeFormatter = _WinUWP.Windows.Globalization.DateTimeFormatting.DateTimeFormatter;
+                    var dtf = new DateTimeFormatter("month.full", _WinUWP.Windows.Globalization.ApplicationLanguages.languages, "ZZ", "GregorianCalendar", "24HourClock");
                     var pat = dtf.patterns[0];
                     var isRTL = pat.charCodeAt(0) === 8207;
 
@@ -55859,8 +55859,8 @@ define('WinJS/Controls/TimePicker',[
                     return { minutes: minutes, hours: hours, clock: clock || "12HourClock", periods: ["AM", "PM"], order: order };
                 }
             });
-            if (_WinRT.Windows.Globalization.DateTimeFormatting && _WinRT.Windows.Globalization.Calendar && _WinRT.Windows.Globalization.ApplicationLanguages) {
-                TimePicker.getInformation = TimePicker._getInformationWinRT;
+            if (_WinUWP.Windows.Globalization.DateTimeFormatting && _WinUWP.Windows.Globalization.Calendar && _WinUWP.Windows.Globalization.ApplicationLanguages) {
+                TimePicker.getInformation = TimePicker._getInformationWinUWP;
             } else {
                 TimePicker.getInformation = TimePicker._getInformationJS;
             }
@@ -56130,7 +56130,7 @@ define('require-style!less/colors-tooltip',[],function(){});
 define('WinJS/Controls/Tooltip',[
     'exports',
     '../Core/_Global',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_BaseUtils',
     '../Core/_Events',
@@ -56142,7 +56142,7 @@ define('WinJS/Controls/Tooltip',[
     '../Utilities/_Hoverable',
     'require-style!less/styles-tooltip',
     'require-style!less/colors-tooltip'
-    ], function tooltipInit(exports, _Global, _WinRT, _Base, _BaseUtils, _Events, Animations, _TransitionAnimation, _Control, _Dispose, _ElementUtilities, _Hoverable) {
+    ], function tooltipInit(exports, _Global, _WinUWP, _Base, _BaseUtils, _Events, Animations, _TransitionAnimation, _Control, _Dispose, _ElementUtilities, _Hoverable) {
     "use strict";
 
     // Tooltip control implementation
@@ -56220,7 +56220,7 @@ define('WinJS/Controls/Tooltip',[
                 messageDuration = DEFAULT_MESSAGE_DURATION,
                 isLeftHanded = false;
 
-            var hasInitWinRTSettings = false;
+            var hasInitWinUWPSettings = false;
 
             var createEvent = _Events._createEventProperty;
 
@@ -56252,16 +56252,16 @@ define('WinJS/Controls/Tooltip',[
                 }
 
                 // Set system attributes if it is in WWA, otherwise, use the default values
-                if (!hasInitWinRTSettings && _WinRT.Windows.UI.ViewManagement.UISettings) { // in WWA
-                    var uiSettings = new _WinRT.Windows.UI.ViewManagement.UISettings();
+                if (!hasInitWinUWPSettings && _WinUWP.Windows.UI.ViewManagement.UISettings) { // in WWA
+                    var uiSettings = new _WinUWP.Windows.UI.ViewManagement.UISettings();
                     mouseHoverTime = _TransitionAnimation._animationTimeAdjustment(uiSettings.mouseHoverTime);
                     nonInfoTooltipNonTouchShowDelay = 2 * mouseHoverTime;
                     infoTooltipNonTouchShowDelay = 2.5 * mouseHoverTime;
                     messageDuration = _TransitionAnimation._animationTimeAdjustment(uiSettings.messageDuration * 1000);  // uiSettings.messageDuration is in seconds.
                     var handedness = uiSettings.handPreference;
-                    isLeftHanded = (handedness === _WinRT.Windows.UI.ViewManagement.HandPreference.leftHanded);
+                    isLeftHanded = (handedness === _WinUWP.Windows.UI.ViewManagement.HandPreference.leftHanded);
                 }
-                hasInitWinRTSettings = true;
+                hasInitWinUWPSettings = true;
 
                 // Need to initialize properties
                 this._disposed = false;
@@ -63887,7 +63887,7 @@ define('require-style!less/colors-overlay',[],function(){});
 define('WinJS/Controls/Flyout/_Overlay',[
     'exports',
     '../../Core/_Global',
-    '../../Core/_WinRT',
+    '../../Core/_WinUWP',
     '../../Core/_Base',
     '../../Core/_BaseUtils',
     '../../Core/_ErrorFromName',
@@ -63904,7 +63904,7 @@ define('WinJS/Controls/Flyout/_Overlay',[
     '../AppBar/_Constants',
     'require-style!less/styles-overlay',
     'require-style!less/colors-overlay'
-], function overlayInit(exports, _Global, _WinRT, _Base, _BaseUtils, _ErrorFromName, _Events, _Resources, _WriteProfilerMark, Animations, Application, ControlProcessor, Promise, Scheduler, _Control, _ElementUtilities, _Constants) {
+], function overlayInit(exports, _Global, _WinUWP, _Base, _BaseUtils, _ErrorFromName, _Events, _Resources, _WriteProfilerMark, Animations, Application, ControlProcessor, Promise, Scheduler, _Control, _ElementUtilities, _Constants) {
     "use strict";
 
     _Base.Namespace._moduleDefine(exports, "WinJS.UI", {
@@ -64039,9 +64039,9 @@ define('WinJS/Controls/Flyout/_Overlay',[
                         Application[listenerOperation]("edgystarting", this._edgyStarting);
                         Application[listenerOperation]("edgycompleted", this._edgyCompleted);
 
-                        if (_WinRT.Windows.UI.ViewManagement.InputPane) {
+                        if (_WinUWP.Windows.UI.ViewManagement.InputPane) {
                             // React to Soft Keyboard events
-                            var inputPane = _WinRT.Windows.UI.ViewManagement.InputPane.getForCurrentView();
+                            var inputPane = _WinUWP.Windows.UI.ViewManagement.InputPane.getForCurrentView();
                             inputPane[listenerOperation]("showing", this._inputPaneShowing, false);
                             inputPane[listenerOperation]("hiding", this._inputPaneHiding, false);
 
@@ -65426,8 +65426,8 @@ define('WinJS/Controls/Flyout/_Overlay',[
 
                         try {
                             return (
-                                _WinRT.Windows.UI.ViewManagement.InputPane &&
-                                _WinRT.Windows.UI.ViewManagement.InputPane.getForCurrentView().occludedRect.height > 0
+                                _WinUWP.Windows.UI.ViewManagement.InputPane &&
+                                _WinUWP.Windows.UI.ViewManagement.InputPane.getForCurrentView().occludedRect.height > 0
                             );
                         } catch (e) {
                             return false;
@@ -65438,9 +65438,9 @@ define('WinJS/Controls/Flyout/_Overlay',[
                     // See if we have to reserve extra space for the IHM
                     get _extraOccluded() {
                         var occluded;
-                        if (_WinRT.Windows.UI.ViewManagement.InputPane) {
+                        if (_WinUWP.Windows.UI.ViewManagement.InputPane) {
                             try {
-                                occluded = _WinRT.Windows.UI.ViewManagement.InputPane.getForCurrentView().occludedRect.height;
+                                occluded = _WinUWP.Windows.UI.ViewManagement.InputPane.getForCurrentView().occludedRect.height;
                             } catch (e) {
                             }
                         }
@@ -65482,8 +65482,8 @@ define('WinJS/Controls/Flyout/_Overlay',[
 
                     // Get total length of the IHM showPanel animation
                     get _animationShowLength() {
-                        if (_WinRT.Windows.UI.Core.AnimationMetrics) {
-                            var a = _WinRT.Windows.UI.Core.AnimationMetrics,
+                        if (_WinUWP.Windows.UI.Core.AnimationMetrics) {
+                            var a = _WinUWP.Windows.UI.Core.AnimationMetrics,
                             animationDescription = new a.AnimationDescription(a.AnimationEffect.showPanel, a.AnimationEffectTarget.primary);
                             var animations = animationDescription.animations;
                             var max = 0;
@@ -65598,7 +65598,7 @@ define('WinJS/Controls/Flyout/_Overlay',[
 
                         var propertiesMixin,
                             hasDeviceFixed = _Global.getComputedStyle(visualViewportSpace).position === "-ms-device-fixed";
-                        if (!hasDeviceFixed && _WinRT.Windows.UI.ViewManagement.InputPane) {
+                        if (!hasDeviceFixed && _WinUWP.Windows.UI.ViewManagement.InputPane) {
                             // If we are in WWA with IE 10 mode, use special keyboard handling knowledge for IE10 IHM.
                             propertiesMixin = _keyboardInfo_Windows8WWA_Mixin;
                             _Global.document.body.removeChild(visualViewportSpace);
@@ -66945,7 +66945,7 @@ define('WinJS/Controls/AppBar/_Icon',[
 define('WinJS/Controls/AppBar/_Command',[
     'exports',
     '../../Core/_Global',
-    '../../Core/_WinRT',
+    '../../Core/_WinUWP',
     '../../Core/_Base',
     '../../Core/_ErrorFromName',
     '../../Core/_Resources',
@@ -66956,7 +66956,7 @@ define('WinJS/Controls/AppBar/_Command',[
     '../Tooltip',
     './_Constants',
     './_Icon'
-    ], function appBarCommandInit(exports, _Global, _WinRT, _Base, _ErrorFromName, _Resources, _Control, _Dispose, _ElementUtilities, _Overlay, Tooltip, _Constants, _Icon) {
+    ], function appBarCommandInit(exports, _Global, _WinUWP, _Base, _ErrorFromName, _Resources, _Control, _Dispose, _ElementUtilities, _Overlay, Tooltip, _Constants, _Icon) {
     "use strict";
 
     _Base.Namespace._moduleDefine(exports, "WinJS.UI", {
@@ -67288,7 +67288,7 @@ define('WinJS/Controls/AppBar/_Command',[
                     },
                     set: function (value) {
                         // we allow settings section only one time
-                        if (!this._section || _WinRT.Windows.ApplicationModel.DesignMode.designModeEnabled) {
+                        if (!this._section || _WinUWP.Windows.ApplicationModel.DesignMode.designModeEnabled) {
                             this._setSection(value);
                         }
                     }
@@ -70407,7 +70407,7 @@ define('WinJS/Controls/AppBar/_Layouts',[
 define('WinJS/Controls/AppBar',[
     'exports',
     '../Core/_Global',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_BaseUtils',
     '../Core/_ErrorFromName',
@@ -70427,7 +70427,7 @@ define('WinJS/Controls/AppBar',[
     './AppBar/_Icon',
     './Flyout/_Overlay',
     '../Application'
-], function appBarInit(exports, _Global, _WinRT, _Base, _BaseUtils, _ErrorFromName, _Resources, _WriteProfilerMark, Animations, Promise, Scheduler, _Control, _Dispose, _ElementUtilities, _Hoverable, _KeyboardBehavior, _Constants, _Layouts, _Command, _Icon, _Overlay, Application) {
+], function appBarInit(exports, _Global, _WinUWP, _Base, _BaseUtils, _ErrorFromName, _Resources, _WriteProfilerMark, Animations, Promise, Scheduler, _Control, _Dispose, _ElementUtilities, _Hoverable, _KeyboardBehavior, _Constants, _Layouts, _Command, _Icon, _Overlay, Application) {
     "use strict";
 
     _Base.Namespace._moduleDefine(exports, "WinJS.UI", {
@@ -70490,7 +70490,7 @@ define('WinJS/Controls/AppBar',[
             function _completedEdgy(e) {
                 // If we had a right click on a flyout, ignore it.
                 if (_Overlay._Overlay._containsRightMouseClick &&
-                    e.kind === _WinRT.Windows.UI.Input.EdgeGestureKind.mouse) {
+                    e.kind === _WinUWP.Windows.UI.Input.EdgeGestureKind.mouse) {
                     return;
                 }
                 if (edgyHappening) {
@@ -70498,7 +70498,7 @@ define('WinJS/Controls/AppBar',[
                     edgyHappening = null;
                 } else {
                     // Edgy wasn't happening, so toggle
-                    var keyboardInvoked = e.kind === _WinRT.Windows.UI.Input.EdgeGestureKind.keyboard;
+                    var keyboardInvoked = e.kind === _WinUWP.Windows.UI.Input.EdgeGestureKind.keyboard;
                     AppBar._toggleAllAppBarsState(keyboardInvoked);
                 }
             }
@@ -70861,7 +70861,7 @@ define('WinJS/Controls/AppBar',[
                     set: function AppBar_set_placement(value) {
                         // In designer we may have to move it
                         var wasShown = false;
-                        if (_WinRT.Windows.ApplicationModel.DesignMode.designModeEnabled) {
+                        if (_WinUWP.Windows.ApplicationModel.DesignMode.designModeEnabled) {
                             this._hide();
                             wasShown = true;
                         }
@@ -70907,7 +70907,7 @@ define('WinJS/Controls/AppBar',[
 
                         // In designer we may have to redraw it
                         var wasShown = false;
-                        if (_WinRT.Windows.ApplicationModel.DesignMode.designModeEnabled) {
+                        if (_WinUWP.Windows.ApplicationModel.DesignMode.designModeEnabled) {
                             this._hide();
                             wasShown = true;
                         }
@@ -72285,7 +72285,7 @@ define('require-style!less/colors-autosuggestbox',[],function(){});
 define('WinJS/Controls/AutoSuggestBox',[
     "exports",
     "../Core/_Global",
-    "../Core/_WinRT",
+    "../Core/_WinUWP",
     "../Core/_Base",
     "../Core/_ErrorFromName",
     "../Core/_Events",
@@ -72301,7 +72301,7 @@ define('WinJS/Controls/AutoSuggestBox',[
     "./AutoSuggestBox/_SearchSuggestionManagerShim",
     "require-style!less/styles-autosuggestbox",
     "require-style!less/colors-autosuggestbox"
-], function autoSuggestBoxInit(exports, _Global, _WinRT, _Base, _ErrorFromName, _Events, _Resources, _Control, _ElementListUtilities, _ElementUtilities, _Hoverable, Animations, BindingList, Promise, Repeater, _SuggestionManagerShim) {
+], function autoSuggestBoxInit(exports, _Global, _WinUWP, _Base, _ErrorFromName, _Events, _Resources, _Control, _ElementListUtilities, _ElementUtilities, _Hoverable, Animations, BindingList, Promise, Repeater, _SuggestionManagerShim) {
     "use strict";
 
     _Base.Namespace._moduleDefine(exports, "WinJS.UI", {
@@ -72645,8 +72645,8 @@ define('WinJS/Controls/AutoSuggestBox',[
 
                 _setupSSM: function asb_setupSSM() {
                     // Get the search suggestion provider if it is available
-                    if (_WinRT.Windows.ApplicationModel.Search.Core.SearchSuggestionManager) {
-                        this._suggestionManager = new _WinRT.Windows.ApplicationModel.Search.Core.SearchSuggestionManager();
+                    if (_WinUWP.Windows.ApplicationModel.Search.Core.SearchSuggestionManager) {
+                        this._suggestionManager = new _WinUWP.Windows.ApplicationModel.Search.Core.SearchSuggestionManager();
                     } else {
                         this._suggestionManager = new _SuggestionManagerShim._SearchSuggestionManagerShim();
                     }
@@ -72888,10 +72888,10 @@ define('WinJS/Controls/AutoSuggestBox',[
                             fullCompositionAlternatives[i] = queryTextPrefix + compositionAlternatives[i] + queryTextSuffix;
                         }
 
-                        if (_WinRT.Windows.ApplicationModel.Search.SearchQueryLinguisticDetails) {
-                            linguisticDetails = new _WinRT.Windows.ApplicationModel.Search.SearchQueryLinguisticDetails(fullCompositionAlternatives, compositionStartOffset, compositionLength);
+                        if (_WinUWP.Windows.ApplicationModel.Search.SearchQueryLinguisticDetails) {
+                            linguisticDetails = new _WinUWP.Windows.ApplicationModel.Search.SearchQueryLinguisticDetails(fullCompositionAlternatives, compositionStartOffset, compositionLength);
                         } else {
-                            // If we're in web compartment, create a script version of the WinRT SearchQueryLinguisticDetails object
+                            // If we're in web compartment, create a script version of the WinUWP SearchQueryLinguisticDetails object
                             linguisticDetails = {
                                 queryTextAlternatives: fullCompositionAlternatives,
                                 queryTextCompositionStart: compositionStartOffset,
@@ -72963,9 +72963,9 @@ define('WinJS/Controls/AutoSuggestBox',[
                         return;
                     }
 
-                    // get the most up to date value of the input langauge from WinRT if available
-                    if (_WinRT.Windows.Globalization.Language) {
-                        this._lastKeyPressLanguage = _WinRT.Windows.Globalization.Language.currentInputMethodLanguageTag;
+                    // get the most up to date value of the input langauge from WinUWP if available
+                    if (_WinUWP.Windows.Globalization.Language) {
+                        this._lastKeyPressLanguage = _WinUWP.Windows.Globalization.Language.currentInputMethodLanguageTag;
                     }
 
                     this._fireEvent(EventNames.querysubmitted, {
@@ -73065,9 +73065,9 @@ define('WinJS/Controls/AutoSuggestBox',[
                     // Refresh hit highlighting if text has changed since focus was present
                     // This can happen if the user committed a suggestion previously.
                     if (this._inputElement.value !== this._prevQueryText) {
-                        if (_WinRT.Windows.Data.Text.SemanticTextQuery) {
+                        if (_WinUWP.Windows.Data.Text.SemanticTextQuery) {
                             if (this._inputElement.value !== "") {
-                                this._hitFinder = new _WinRT.Windows.Data.Text.SemanticTextQuery(this._inputElement.value, this._inputElement.lang);
+                                this._hitFinder = new _WinUWP.Windows.Data.Text.SemanticTextQuery(this._inputElement.value, this._inputElement.lang);
                             } else {
                                 this._hitFinder = null;
                             }
@@ -73127,14 +73127,14 @@ define('WinJS/Controls/AutoSuggestBox',[
                         }
                         this._prevQueryText = this._inputElement.value;
 
-                        // get the most up to date value of the input langauge from WinRT if available
-                        if (_WinRT.Windows.Globalization.Language) {
-                            this._lastKeyPressLanguage = _WinRT.Windows.Globalization.Language.currentInputMethodLanguageTag;
+                        // get the most up to date value of the input langauge from WinUWP if available
+                        if (_WinUWP.Windows.Globalization.Language) {
+                            this._lastKeyPressLanguage = _WinUWP.Windows.Globalization.Language.currentInputMethodLanguageTag;
                         }
 
-                        if (_WinRT.Windows.Data.Text.SemanticTextQuery) {
+                        if (_WinUWP.Windows.Data.Text.SemanticTextQuery) {
                             if (this._inputElement.value !== "") {
-                                this._hitFinder = new _WinRT.Windows.Data.Text.SemanticTextQuery(this._inputElement.value, this._lastKeyPressLanguage);
+                                this._hitFinder = new _WinUWP.Windows.Data.Text.SemanticTextQuery(this._inputElement.value, this._lastKeyPressLanguage);
                             } else {
                                 this._hitFinder = null;
                             }
@@ -73330,9 +73330,9 @@ define('WinJS/Controls/AutoSuggestBox',[
                 },
 
                 _suggestionsRequestedHandler: function asb_suggestionsRequestedHandler(event) {
-                    // get the most up to date value of the input langauge from WinRT if available
-                    if (_WinRT.Windows.Globalization.Language) {
-                        this._lastKeyPressLanguage = _WinRT.Windows.Globalization.Language.currentInputMethodLanguageTag;
+                    // get the most up to date value of the input langauge from WinUWP if available
+                    if (_WinUWP.Windows.Globalization.Language) {
+                        this._lastKeyPressLanguage = _WinUWP.Windows.Globalization.Language.currentInputMethodLanguageTag;
                     }
 
                     var request = event.request || event.detail.request;
@@ -73361,8 +73361,8 @@ define('WinJS/Controls/AutoSuggestBox',[
                     /// </param>
                     /// <compatibleWith platform="Windows" minVersion="8.1"/>
                     /// </signature>
-                    if (_WinRT.Windows.Foundation.Uri && _WinRT.Windows.Storage.Streams.RandomAccessStreamReference) {
-                        return _WinRT.Windows.Storage.Streams.RandomAccessStreamReference.createFromUri(new _WinRT.Windows.Foundation.Uri(url));
+                    if (_WinUWP.Windows.Foundation.Uri && _WinUWP.Windows.Storage.Streams.RandomAccessStreamReference) {
+                        return _WinUWP.Windows.Storage.Streams.RandomAccessStreamReference.createFromUri(new _WinUWP.Windows.Foundation.Uri(url));
                     }
                     return url;
                 },
@@ -73401,7 +73401,7 @@ define('WinJS/Controls/AutoSuggestBox',[
 
                     var reducedHits = [];
                     if (hitsProvided) {
-                        // Copy hitsprovided array as winrt objects are immutable.
+                        // Copy hitsprovided array as winuwp objects are immutable.
                         var hits = new Array(hitsProvided.length);
                         for (var i = 0; i < hitsProvided.length; i++) {
                             hits.push({ startPosition: hitsProvided[i].startPosition, length: hitsProvided[i].length });
@@ -73603,7 +73603,7 @@ define('require-style!less/colors-searchbox',[],function(){});
 // Copyright (c) Microsoft Open Technologies, Inc.  All Rights Reserved. Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 define('WinJS/Controls/SearchBox',[
     '../Core/_Global',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_ErrorFromName',
     '../Core/_Events',
@@ -73615,7 +73615,7 @@ define('WinJS/Controls/SearchBox',[
     '../Application',
     'require-style!less/styles-searchbox',
     'require-style!less/colors-searchbox'
-], function searchboxInit(_Global, _WinRT, _Base, _ErrorFromName, _Events, _Resources, AutoSuggestBox, _Control, _ElementUtilities, _SuggestionManagerShim, Application) {
+], function searchboxInit(_Global, _WinUWP, _Base, _ErrorFromName, _Events, _Resources, AutoSuggestBox, _Control, _ElementUtilities, _SuggestionManagerShim, Application) {
     "use strict";
 
     _Base.Namespace.define("WinJS.UI", {
@@ -73843,8 +73843,8 @@ define('WinJS/Controls/SearchBox',[
                     /// </param>
                     /// <compatibleWith platform="Windows" minVersion="8.1"/>
                     /// </signature>
-                    if (_WinRT.Windows.Foundation.Uri && _WinRT.Windows.Storage.Streams.RandomAccessStreamReference) {
-                        return _WinRT.Windows.Storage.Streams.RandomAccessStreamReference.createFromUri(new _WinRT.Windows.Foundation.Uri(url));
+                    if (_WinUWP.Windows.Foundation.Uri && _WinUWP.Windows.Storage.Streams.RandomAccessStreamReference) {
+                        return _WinUWP.Windows.Storage.Streams.RandomAccessStreamReference.createFromUri(new _WinUWP.Windows.Foundation.Uri(url));
                     }
                     return url;
                 },
@@ -73887,7 +73887,7 @@ define('WinJS/Controls/SearchBox',[
 /// <dictionary>appbar,Flyout,Flyouts,registeredforsettings,SettingsFlyout,Statics,Syriac</dictionary>
 define('WinJS/Controls/SettingsFlyout',[
     '../Core/_Global',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_BaseUtils',
     '../Core/_ErrorFromName',
@@ -73902,7 +73902,7 @@ define('WinJS/Controls/SettingsFlyout',[
     '../Utilities/_Hoverable',
     './AppBar/_Constants',
     './Flyout/_Overlay'
-    ], function settingsFlyoutInit(_Global,_WinRT, _Base, _BaseUtils, _ErrorFromName, _Resources, _WriteProfilerMark, Animations, Pages, Promise, _Dispose, _ElementUtilities, _ElementListUtilities, _Hoverable, _Constants, _Overlay) {
+    ], function settingsFlyoutInit(_Global,_WinUWP, _Base, _BaseUtils, _ErrorFromName, _Resources, _WriteProfilerMark, Animations, Pages, Promise, _Dispose, _ElementUtilities, _ElementListUtilities, _Hoverable, _Constants, _Overlay) {
     "use strict";
 
     _Base.Namespace.define("WinJS.UI", {
@@ -73940,8 +73940,8 @@ define('WinJS/Controls/SettingsFlyout',[
 
             // Determine if the settings pane (system language) is RTL or not.
             function _shouldAnimateFromLeft() {
-                if (_WinRT.Windows.UI.ApplicationSettings.SettingsEdgeLocation) {
-                    var appSettings = _WinRT.Windows.UI.ApplicationSettings;
+                if (_WinUWP.Windows.UI.ApplicationSettings.SettingsEdgeLocation) {
+                    var appSettings = _WinUWP.Windows.UI.ApplicationSettings;
                     return (appSettings.SettingsPane.edge === appSettings.SettingsEdgeLocation.left);
                 } else {
                     return false;
@@ -74421,8 +74421,8 @@ define('WinJS/Controls/SettingsFlyout',[
                 /// <compatibleWith platform="Windows" minVersion="8.0"/>
                 /// </signature>
                 /// Show the main settings pane
-                if (_WinRT.Windows.UI.ApplicationSettings.SettingsPane) {
-                    _WinRT.Windows.UI.ApplicationSettings.SettingsPane.show();
+                if (_WinUWP.Windows.UI.ApplicationSettings.SettingsPane) {
+                    _WinUWP.Windows.UI.ApplicationSettings.SettingsPane.show();
                 }
                 // And hide the WWA one
                 var elements = _Global.document.querySelectorAll('div[data-win-control="WinJS.UI.SettingsFlyout"]');
@@ -74450,7 +74450,7 @@ define('WinJS/Controls/SettingsFlyout',[
                 _settingsEvent.event = e.detail;
 
                 if (_settingsEvent.event.applicationcommands) {
-                    var n = _WinRT.Windows.UI.ApplicationSettings;
+                    var n = _WinUWP.Windows.UI.ApplicationSettings;
                     Object.keys(_settingsEvent.event.applicationcommands).forEach(function (name) {
                         var setting = _settingsEvent.event.applicationcommands[name];
                         if (!setting.title) { setting.title = name; }
@@ -76381,7 +76381,7 @@ define('require-style!less/colors-navbar',[],function(){});
 // Copyright (c) Microsoft Open Technologies, Inc.  All Rights Reserved. Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 define('WinJS/Controls/NavBar',[
     '../Core/_Global',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_BaseUtils',
     '../Core/_Events',
@@ -76395,7 +76395,7 @@ define('WinJS/Controls/NavBar',[
     './NavBar/_Container',
     'require-style!less/styles-navbar',
     'require-style!less/colors-navbar'
-], function NavBarInit(_Global,_WinRT, _Base, _BaseUtils, _Events, _WriteProfilerMark, Promise, Scheduler, _ElementUtilities, _Hoverable, AppBar, _Command, _Container) {
+], function NavBarInit(_Global,_WinUWP, _Base, _BaseUtils, _Events, _WriteProfilerMark, Promise, Scheduler, _ElementUtilities, _Hoverable, AppBar, _Command, _Container) {
     "use strict";
 
     var customLayout = "custom";
@@ -76460,7 +76460,7 @@ define('WinJS/Controls/NavBar',[
 
                 _ElementUtilities.addClass(this.element, NavBar._ClassName.navbar);
 
-                if (_WinRT.Windows.ApplicationModel.DesignMode.designModeEnabled) {
+                if (_WinUWP.Windows.ApplicationModel.DesignMode.designModeEnabled) {
                     this._processChildren();
                 } else {
                     Scheduler.schedule(this._processChildren.bind(this), Scheduler.Priority.idle, null, "WinJS.UI.NavBar.processChildren");
@@ -76791,7 +76791,7 @@ define('WinJS/Controls/ContentDialog',[
     '../_Signal',
     '../Core/_BaseUtils',
     '../Core/_Global',
-    '../Core/_WinRT',
+    '../Core/_WinUWP',
     '../Core/_Base',
     '../Core/_Events',
     '../Core/_ErrorFromName',
@@ -76802,7 +76802,7 @@ define('WinJS/Controls/ContentDialog',[
     '../Animations',
     'require-style!less/styles-contentdialog',
     'require-style!less/colors-contentdialog'
-    ], function contentDialogInit(Application, _Dispose, Promise, _Signal, _BaseUtils, _Global, _WinRT, _Base, _Events, _ErrorFromName, _Resources, _Control, _ElementUtilities, _Hoverable, _Animations) {
+    ], function contentDialogInit(Application, _Dispose, Promise, _Signal, _BaseUtils, _Global, _WinUWP, _Base, _Events, _ErrorFromName, _Resources, _Control, _ElementUtilities, _Hoverable, _Animations) {
     "use strict";
 
     var ContentDialogManager;
@@ -77147,8 +77147,8 @@ define('WinJS/Controls/ContentDialog',[
                                 that._pendingHide = null;
                                 _ElementUtilities.addClass(that.dialog._dom.root, ClassNames._visible);
                                 that.dialog._addExternalListeners();
-                                if (_WinRT.Windows.UI.ViewManagement.InputPane) {
-                                    var inputPaneHeight = _WinRT.Windows.UI.ViewManagement.InputPane.getForCurrentView().occludedRect.height;
+                                if (_WinUWP.Windows.UI.ViewManagement.InputPane) {
+                                    var inputPaneHeight = _WinUWP.Windows.UI.ViewManagement.InputPane.getForCurrentView().occludedRect.height;
                                     if (inputPaneHeight > 0) {
                                         that.dialog._renderForInputPane(inputPaneHeight);
                                     }

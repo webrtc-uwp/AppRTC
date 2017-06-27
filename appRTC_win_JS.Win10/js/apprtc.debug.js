@@ -437,7 +437,7 @@ var AppController = function (loadingParams) {
     var app = WinJS.Application;
 
     var promiseErrhandled = false;
-    app.addEventListener("checkpoint", this.onWinRTAppSuspending_.bind(this), false);
+    app.addEventListener("checkpoint", this.onWinUWPAppSuspending_.bind(this), false);
 
     Promise.prototype.catchDisp = function (value) {
 
@@ -498,13 +498,13 @@ var AppController = function (loadingParams) {
   }.bind(this));
 };
 
-AppController.prototype.onWinRTAppSuspending_ = function (evt) {
-  evt.detail.setPromise(this.processWinRTAppSuspending_());
+AppController.prototype.onWinUWPAppSuspending_ = function (evt) {
+  evt.detail.setPromise(this.processWinUWPAppSuspending_());
 }
-AppController.prototype.processWinRTAppSuspending_ = function () {
+AppController.prototype.processWinUWPAppSuspending_ = function () {
 
   if (this.call_ != null) {
-    this.call_.onWinRTAppSuspending();
+    this.call_.onWinUWPAppSuspending();
   }
   Org.WebRtc.Media.onAppSuspending();
   window.location = "/default.html"; //reload
@@ -880,7 +880,7 @@ Call.prototype.restart = function () {
   this.start(this.params_.previousRoomId);
 };
 
-Call.prototype.onWinRTAppSuspending = function () {
+Call.prototype.onWinUWPAppSuspending = function () {
   this.hangup(false);
 }
 
@@ -894,7 +894,7 @@ Call.prototype.hangup = function (async) {
     /*if (this.pcClient_) {
         this.pcClient_.removeStream(this.localStream_);
     }*/
-      // For winrt, need to explicitly remove tracks to release local audio/video resource
+      // For WinUWP, need to explicitly remove tracks to release local audio/video resource
 
     trace("call.hangup release user media");
     if (navigator.releaseUserMedia) {
@@ -975,7 +975,7 @@ Call.prototype.getLeaveUrl_ = function () {
 Call.prototype.onRemoteHangup = function () {
     if (this.localStream_) {
 
-        // For winrt, need to explicitly remove tracks to release local audio/video resource
+        // For WinUWP, need to explicitly remove tracks to release local audio/video resource
         trace("call.hangup release user media");
         if (navigator.releaseUserMedia) {
 
